@@ -39,9 +39,14 @@ dev-graph-copilot-edition/
 │       ├── review-spec.prompt.md          /review-spec — human gate helper
 │       ├── coder-input.prompt.md          /coder-input — hands off spec to Coder
 │       └── pr-body.prompt.md              /pr-body — assembles PR description
-└── examples/
-    └── preferred-topics.md                worked example of the full flow
+├── examples/
+│   └── preferred-topics.md                worked example of the full flow
+└── scripts/
+    ├── install-into-repo.py               copy .github/ + WORKFLOW.md into a target repo
+    └── validate-chatmodes.py              lint the chatmode & prompt files
 ```
+
+The two Python scripts under `scripts/` are optional conveniences (pure stdlib, no dependencies) — everything else works without them.
 
 ## Setup on the office machine
 
@@ -49,6 +54,19 @@ dev-graph-copilot-edition/
 
 The `.github/` folder is designed to live inside your target repo so Copilot
 picks it up automatically for that workspace.
+
+**Easiest:** use the installer script from this kit.
+
+```bash
+python scripts/install-into-repo.py --target /path/to/your/recommendation-backend
+# preview first with --dry-run; use --force to overwrite existing files
+```
+
+The installer refuses to overwrite an existing `copilot-instructions.md`
+without `--force`, since that file is often team-owned. Individual chatmode
+and prompt files are skipped if they already exist.
+
+**Manual alternative:**
 
 ```bash
 # from your recommendation-backend repo root:
@@ -102,6 +120,19 @@ reasoning. If pass, run `/pr-body` to generate the PR description, then
 `git add`, commit, push, `gh pr create` (or use the Source Control panel).
 
 Full step-by-step in **WORKFLOW.md**.
+
+### 5. Validate (optional)
+
+If you ever hand-edit a chatmode or prompt file, sanity-check it:
+
+```bash
+python scripts/validate-chatmodes.py
+# or point at an installed copy:
+python scripts/validate-chatmodes.py --dir /path/to/your/repo/.github
+```
+
+Checks frontmatter validity, required fields (`description`), duplicate
+names, and that any `mode:` reference in a prompt matches a real chat mode.
 
 ## Transport
 

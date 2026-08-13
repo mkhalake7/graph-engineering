@@ -326,7 +326,25 @@
 
 <p>The kit is designed to live inside your target repo so Copilot picks it up automatically for that workspace.</p>
 
-<h3>If you have the git bundle</h3>
+<h3>Easiest — use the installer script</h3>
+
+<pre><code><span class="tok-com"># From inside the unpacked kit</span>
+python scripts/install-into-repo.py --target /path/to/your/recommendation-backend
+
+<span class="tok-com"># Preview first without writing</span>
+python scripts/install-into-repo.py --target /path/to/your/repo --dry-run
+
+<span class="tok-com"># Overwrite existing files (use with care — copilot-instructions.md is often team-owned)</span>
+python scripts/install-into-repo.py --target /path/to/your/repo --force
+</code></pre>
+
+<p>The installer copies <code>.github/copilot-instructions.md</code>, all chatmode and prompt files, and <code>WORKFLOW.md</code>. It refuses to clobber an existing <code>copilot-instructions.md</code> without <code>--force</code>, and skips individual chatmode/prompt files that already exist. Pure stdlib, no dependencies.</p>
+
+<p>After installing, you can validate the result:</p>
+
+<pre><code>python scripts/validate-chatmodes.py --dir /path/to/your/repo/.github</code></pre>
+
+<h3>Manual alternative — if you already have the git bundle</h3>
 
 <pre><code><span class="tok-com"># 1. Unpack the bundle to a scratch location</span>
 mkdir ~/tmp/copilot-kit &amp;&amp; cd ~/tmp/copilot-kit
