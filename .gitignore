@@ -1,0 +1,15 @@
+.DS_Store
+*.bundle
+.venv*/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.dev-graph/
+.dev_graph/
+.env
+dist/
+build/
+*.egg-info/

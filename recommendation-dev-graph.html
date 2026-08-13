@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Graph-Engineered Dev Workflow — Recommendation Backend</title>
+<style>
+  :root {
+    --bg: #0e1117;
+    --bg-card: #161b22;
+    --bg-code: #0a0d12;
+    --border: #30363d;
+    --border-soft: #21262d;
+    --text: #e6edf3;
+    --text-dim: #8b949e;
+    --text-muted: #6e7681;
+    --accent: #58a6ff;
+    --accent-2: #a371f7;
+    --accent-3: #3fb950;
+    --accent-warn: #f0883e;
+    --accent-graph: #f778ba;
+    --accent-red: #ff7b72;
+    --code: #d2a8ff;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, system-ui, sans-serif;
+    --font-mono: "SF Mono", Monaco, Menlo, Consolas, "Liberation Mono", monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    line-height: 1.65;
+    font-size: 16px;
+  }
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 48px 24px 96px; }
+
+  header.hero {
+    padding: 40px 0 32px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 40px;
+  }
+  .eyebrow {
+    color: var(--accent-graph);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  h1 {
+    font-size: 40px;
+    line-height: 1.15;
+    margin: 0 0 16px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+  .subtitle { font-size: 18px; color: var(--text-dim); margin: 0; max-width: 780px; }
+
+  h2 {
+    font-size: 28px;
+    margin: 56px 0 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  h2 .num {
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 18px;
+    margin-right: 12px;
+    font-weight: 500;
+  }
+  h3 {
+    font-size: 21px;
+    margin: 36px 0 12px;
+    font-weight: 700;
+  }
+  h4 {
+    font-size: 15px;
+    margin: 20px 0 8px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text);
+  }
+  p { margin: 0 0 14px; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  code {
+    font-family: var(--font-mono);
+    background: var(--bg-code);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 13px;
+    color: var(--code);
+    border: 1px solid var(--border-soft);
+  }
+  pre {
+    background: var(--bg-code);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    line-height: 1.6;
+    margin: 18px 0;
+  }
+  pre code { background: transparent; padding: 0; border: none; color: var(--text); }
+  .tok-key { color: #ff7b72; }
+  .tok-str { color: #a5d6ff; }
+  .tok-fn { color: #d2a8ff; }
+  .tok-com { color: var(--text-muted); font-style: italic; }
+  .tok-num { color: #79c0ff; }
+  .tok-type { color: #ffa657; }
+
+  blockquote {
+    border-left: 3px solid var(--accent-graph);
+    padding: 4px 0 4px 20px;
+    margin: 20px 0;
+    color: var(--text-dim);
+    font-style: italic;
+    font-size: 16px;
+  }
+
+  ul, ol { padding-left: 22px; margin: 12px 0 20px; }
+  li { margin-bottom: 6px; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  th, td { padding: 11px 14px; text-align: left; border-bottom: 1px solid var(--border-soft); vertical-align: top; }
+  th { background: var(--bg-card); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+  tr:last-child td { border-bottom: none; }
+  tr:nth-child(even) td { background: rgba(255,255,255,0.015); }
+
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 22px 26px;
+    margin: 18px 0;
+  }
+
+  .diagram {
+    background: var(--bg-code);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px;
+    margin: 20px 0 24px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.55;
+    color: var(--text);
+    overflow-x: auto;
+  }
+  .diagram pre { background: none; border: none; padding: 0; margin: 0; }
+
+  .callout {
+    background: rgba(247,120,186,0.06);
+    border: 1px solid rgba(247,120,186,0.25);
+    border-left: 3px solid var(--accent-graph);
+    padding: 14px 18px;
+    border-radius: 6px;
+    margin: 18px 0;
+    font-size: 14.5px;
+  }
+  .callout strong { color: var(--accent-graph); }
+  .callout.warn { background: rgba(240,136,62,0.06); border-color: rgba(240,136,62,0.25); border-left-color: var(--accent-warn); }
+  .callout.warn strong { color: var(--accent-warn); }
+  .callout.info { background: rgba(88,166,255,0.06); border-color: rgba(88,166,255,0.25); border-left-color: var(--accent); }
+  .callout.info strong { color: var(--accent); }
+
+  .node-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+    margin: 20px 0;
+  }
+  .node {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 18px;
+    border-left: 3px solid var(--accent-graph);
+  }
+  .node.planner { border-left-color: var(--accent-2); }
+  .node.human { border-left-color: var(--accent-warn); }
+  .node.worker { border-left-color: var(--accent-3); }
+  .node.gate { border-left-color: var(--accent); }
+  .node .n-title {
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 4px;
+  }
+  .node .n-model {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+  .node .n-desc { font-size: 13px; color: var(--text-dim); margin: 0; }
+
+  .tag {
+    display: inline-block;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    margin-right: 4px;
+  }
+  .tag.opus { background: rgba(163,113,247,0.14); color: var(--accent-2); border: 1px solid rgba(163,113,247,0.3); }
+  .tag.sonnet { background: rgba(88,166,255,0.14); color: var(--accent); border: 1px solid rgba(88,166,255,0.3); }
+  .tag.haiku { background: rgba(63,185,80,0.14); color: var(--accent-3); border: 1px solid rgba(63,185,80,0.3); }
+  .tag.human { background: rgba(240,136,62,0.14); color: var(--accent-warn); border: 1px solid rgba(240,136,62,0.3); }
+  .tag.tool { background: rgba(247,120,186,0.14); color: var(--accent-graph); border: 1px solid rgba(247,120,186,0.3); }
+
+  footer {
+    margin-top: 72px;
+    padding-top: 28px;
+    border-top: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 13px;
+  }
+
+  .toc {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 18px 24px;
+    margin: 28px 0;
+  }
+  .toc-title { font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); font-weight: 600; margin-bottom: 10px; }
+  .toc ol { margin: 0; padding-left: 22px; }
+  .toc li { margin-bottom: 5px; font-size: 14px; }
+  .toc a { color: var(--text); }
+  .toc a:hover { color: var(--accent-graph); }
+
+  @media (max-width: 700px) {
+    h1 { font-size: 30px; }
+    h2 { font-size: 22px; }
+    .wrap { padding: 24px 16px 64px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <div class="eyebrow">Graph Engineering · Applied Design</div>
+  <h1>Graph-Engineered Dev Workflow for a Recommendation Backend</h1>
+  <p class="subtitle">A multi-agent coding organization that builds and maintains your recommendation service — with the ML team's library, OpenSearch, Limeglass embeddings, and LLM-based user profile enrichment and reranking.</p>
+</header>
+
+<nav class="toc">
+  <div class="toc-title">Contents</div>
+  <ol>
+    <li><a href="#context">The System Being Built</a></li>
+    <li><a href="#why">Why a Dev-Workflow Graph</a></li>
+    <li><a href="#graph">The Dev Graph — Overview</a></li>
+    <li><a href="#state">Shared State Schema</a></li>
+    <li><a href="#nodes">Node Catalog</a></li>
+    <li><a href="#routing">Routing Rules &amp; Human Checkpoints</a></li>
+    <li><a href="#example">Worked Example: Building User-Profile Enrichment</a></li>
+    <li><a href="#impl">Implementation with LangGraph + Claude Agent SDK</a></li>
+    <li><a href="#rollout">Phased Rollout</a></li>
+    <li><a href="#antipatterns">Anti-Patterns to Avoid</a></li>
+  </ol>
+</nav>
+
+<!-- ============================================================ -->
+<section id="context">
+<h2><span class="num">01</span>The System Being Built</h2>
+
+<p>Before designing the dev graph, we need a clear picture of the runtime system it produces. There are <strong>two distinct paths</strong> — a write-path pipeline that builds the enriched user profile, and a read-path API that serves recommendations. Getting these two paths right is the whole point of the backend.</p>
+
+<ul>
+  <li><strong>Upstream Glue job</strong> — batch aggregation of readership + subscription data. Produces a base user profile snapshot to S3.</li>
+  <li><strong>S3: base user profile</strong> — the handoff surface between the Glue job and your backend.</li>
+  <li><strong>Document team's OpenSearch index</strong> — documents with tags and Limeglass embeddings, owned by another team.</li>
+  <li><strong>Your backend — enrichment worker</strong> — reads the base profile from S3, fetches recent-read doc details from the docs index, runs LLM enrichment, writes the result to a second OpenSearch index.</li>
+  <li><strong>OpenSearch: enriched user profile index</strong> — a distinct index (separate from the docs index) that your API reads at request time. Pre-computed so the request path stays fast.</li>
+  <li><strong>Your backend — /recommend API</strong> — fetches the enriched profile + anchor doc + candidates, calls the ML library, reranks with an LLM, returns the response.</li>
+  <li><strong>ML team's library</strong> — the recommendation scoring algorithm (black-box from your team's perspective).</li>
+  <li><strong>LLM (Claude / equivalent)</strong> — used inside your service for user profile enrichment and for reranking.</li>
+</ul>
+
+<h3>Write path — enrichment pipeline</h3>
+
+<div class="diagram">
+<pre>
+   ┌──────────────────┐       ┌──────────────────┐
+   │  Readership DB   │       │ Subscription DB  │
+   └────────┬─────────┘       └────────┬─────────┘
+            └────────────┬─────────────┘
+                         ▼
+              ┌──────────────────────┐
+              │   AWS Glue Job       │   ← batch, upstream
+              │   aggregate + shape  │
+              └──────────┬───────────┘
+                         ▼
+              ┌──────────────────────┐
+              │   S3: base user      │   ← handoff surface
+              │   profile snapshot   │      (parquet / json)
+              └──────────┬───────────┘
+                         │
+                         ▼
+      ┌───────────────────────────────────────┐
+      │   Backend: Enrichment Worker          │   ← YOUR SERVICE
+      │                                       │
+      │   1. read base profile from S3        │
+      │   2. take recent read doc_ids         │
+      │   3. fetch doc details from           │──── reads ───┐
+      │      OpenSearch (docs index)          │              │
+      │   4. LLM enrich → interests, topics,  │              │
+      │      personas, preferred_topics       │              ▼
+      │   5. shape enriched profile document  │      ┌──────────────────┐
+      │                                       │      │ OpenSearch:      │
+      └──────────────────┬────────────────────┘      │ docs index       │
+                         │                           │ (tags, Limeglass │
+                         │ writes                    │  embeddings)     │
+                         ▼                           └──────────────────┘
+              ┌───────────────────────────────┐
+              │  OpenSearch:                  │   ← distinct index
+              │  enriched user profile index  │      from docs
+              └───────────────────────────────┘
+
+   Triggering: after Glue completes (event or scheduled poll).
+   Alternative: lazy — cache miss on read triggers on-demand enrichment.
+</pre>
+</div>
+
+<h3>Read path — recommendation API</h3>
+
+<div class="diagram">
+<pre>
+   POST /recommend  ──▶ ┌──────────────────────────┐
+   {                    │  /recommend API          │   ← YOUR SERVICE
+     user_id,           │  (fast path, sync)       │
+     anchor_doc_id,     └────────────┬─────────────┘
+     candidate_docs                  │
+   }                                 │  parallel fetch
+                   ┌─────────────────┼─────────────────┐
+                   ▼                 ▼                 ▼
+       ┌──────────────────┐  ┌─────────────┐  ┌──────────────────┐
+       │ OpenSearch:      │  │ OpenSearch: │  │ OpenSearch:      │
+       │ enriched user    │  │ anchor doc  │  │ candidate docs   │
+       │ profile          │  │ + embedding │  │ (hydrate / kNN)  │
+       └────────┬─────────┘  └──────┬──────┘  └────────┬─────────┘
+                └───────────────────┼──────────────────┘
+                                    ▼
+                       ┌──────────────────────┐
+                       │  ML team's recommend │   ← black-box lib
+                       │  library (scoring)   │
+                       └──────────┬───────────┘
+                                  ▼
+                       ┌──────────────────────┐
+                       │  LLM Reranker        │   ← top-N re-order
+                       └──────────┬───────────┘
+                                  ▼
+                       ┌──────────────────────┐
+                       │  Response payload    │
+                       └──────────────────────┘
+</pre>
+</div>
+
+<div class="callout info">
+  <strong>Why the two-path split matters for the dev graph.</strong> The write path is batch-tolerant, LLM-heavy, and correctness-sensitive (bad enrichment poisons every future recommendation). The read path is latency-sensitive, request-scoped, and consistency-sensitive (a stale profile is better than a slow response). Dev tasks will almost always target one path or the other — the graph should route accordingly.
+</div>
+
+<p>Your team owns everything in the middle: the enrichment worker, both LLM prompts, the OpenSearch enriched-profile mapping, and the recommend API. The dev graph below is designed to build, extend, and maintain exactly this surface.</p>
+</section>
+
+<!-- ============================================================ -->
+<section id="why">
+<h2><span class="num">02</span>Why a Dev-Workflow Graph</h2>
+
+<p>You are already using prompt engineering (crafting good instructions) and loop engineering (Claude Code / Codex-style autonomous coding runs). Those work well for individual tasks. They start to break down when:</p>
+
+<ul>
+  <li>A feature touches <strong>multiple concerns</strong> at once — API + data pipeline + LLM prompt + OpenSearch mapping + tests.</li>
+  <li>You need a <strong>specialist</strong> for LLM prompt design that differs from the specialist for OpenSearch queries.</li>
+  <li>Work should run in <strong>parallel</strong> — a coder edits the API while another writes tests while another updates the OpenSearch mapping.</li>
+  <li>You need <strong>explicit human checkpoints</strong> — spec approval before code, PR review before merge, prompt approval before it hits prod.</li>
+  <li>You need <strong>traceability</strong> — which agent made which change, why, and what verified it.</li>
+</ul>
+
+<div class="callout">
+  <strong>Reframe.</strong> Loop engineering asks: "how does one agent finish one task?" Graph engineering asks: "how does an organization of specialized agents build and maintain a whole service?" Your team becomes the <em>graph designer</em>, not the operator of every loop.
+</div>
+</section>
+
+<!-- ============================================================ -->
+<section id="graph">
+<h2><span class="num">03</span>The Dev Graph — Overview</h2>
+
+<p>Trigger: an engineering task (Linear ticket, Slack request, cron-scheduled maintenance job). Output: a merged PR with tests passing and a trace of what happened.</p>
+
+<div class="diagram">
+<pre>
+                           ┌─────────────────────────┐
+    TASK IN ─────────────▶│    Intake / Router       │  <span class="tok-com">← Sonnet, cheap</span>
+    (ticket, slack,        │    classify + normalize  │
+     cron)                 └────────────┬─────────────┘
+                                        │
+                                        ▼
+                           ┌─────────────────────────┐
+                           │   Repo Context Explorer  │  <span class="tok-com">← read-only search</span>
+                           │   grep, read, embeddings │
+                           └────────────┬─────────────┘
+                                        │
+                                        ▼
+                           ┌─────────────────────────┐
+                           │      Spec Architect      │  <span class="tok-com">← Opus (strong)</span>
+                           │  produce Spec + AC       │
+                           └────────────┬─────────────┘
+                                        │
+                                        ▼
+                         ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+                         ┃  HUMAN CHECKPOINT: Spec OK? ┃  <span class="tok-com">← engineer approves</span>
+                         ┗━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┛
+                                      │
+                                      ▼
+                           ┌─────────────────────────┐
+                           │       Planner            │  <span class="tok-com">← Opus, decomposes</span>
+                           │  work-graph generator    │
+                           └────────────┬─────────────┘
+                                        │  fan-out based on task type
+        ┌─────────────┬─────────────────┼──────────────────┬────────────────┐
+        ▼             ▼                 ▼                  ▼                ▼
+   ┌─────────┐  ┌──────────┐   ┌───────────────┐  ┌──────────────┐  ┌────────────┐
+   │ API     │  │ Data     │   │ LLM Prompt    │  │ OpenSearch   │  │ Migration  │
+   │ Coder   │  │ Pipeline │   │ Engineer      │  │ Mapping/Query│  │ / Schema   │
+   │(Sonnet) │  │ Coder    │   │ (Opus)        │  │ Coder (Sonn.)│  │ Coder      │
+   └────┬────┘  └────┬─────┘   └──────┬────────┘  └──────┬───────┘  └─────┬──────┘
+        └───────────┼─────────────────┼──────────────────┼────────────────┘
+                    │      fan-in     │
+                    ▼                 ▼
+             ┌─────────────┐    ┌──────────────┐
+             │ Test Author │    │ Prompt Eval  │  <span class="tok-com">← runs eval suite</span>
+             │ (Sonnet)    │    │ Suite Runner │       on LLM changes
+             └──────┬──────┘    └──────┬───────┘
+                    └──────────┬───────┘
+                               ▼
+                    ┌─────────────────────┐
+                    │  Integration Runner │   <span class="tok-com">← pytest, lint, type-check</span>
+                    └──────────┬──────────┘
+                               │
+                    ┌──────────┴──────────┐
+                    │                     │
+                    ▼ pass                ▼ fail
+              ┌───────────┐        ┌──────────────┐
+              │  Grader   │◀───────│ Route to     │
+              │ (verify   │        │ failing      │
+              │  vs spec) │        │ specialist   │──┐
+              └─────┬─────┘        └──────────────┘  │  (bounded retry)
+                    │                                │
+                    │ pass                           │
+                    ▼                                │
+        ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓             │
+        ┃  HUMAN CHECKPOINT: PR review┃             │
+        ┗━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┛             │
+                    │                                │
+                    ▼                                │
+             ┌───────────────┐                       │
+             │ PR Publisher  │◀──────────────────────┘
+             │ (branch, PR)  │
+             └───────┬───────┘
+                     ▼
+                  DONE — trace + summary written back to ticket
+</pre>
+</div>
+
+<p>Two things to notice:</p>
+<ol>
+  <li>The graph has an <strong>Org shape</strong> (fixed nodes with stable roles) and a <strong>Work shape</strong> (which workers actually get called depends on the Planner's decomposition of the current task).</li>
+  <li>Every cycle is <strong>bounded and explicit</strong>. No infinite retries. Failing branches route back to a specific node with feedback.</li>
+</ol>
+</section>
+
+<!-- ============================================================ -->
+<section id="state">
+<h2><span class="num">04</span>Shared State Schema</h2>
+
+<p>State is the object that flows along every edge. Keeping it typed is what separates a graph from a pile of prompts.</p>
+
+<pre><code><span class="tok-key">from</span> typing <span class="tok-key">import</span> TypedDict, Literal, Optional
+<span class="tok-key">from</span> pydantic <span class="tok-key">import</span> BaseModel
+
+<span class="tok-key">class</span> <span class="tok-type">Spec</span>(BaseModel):
+    summary: <span class="tok-type">str</span>
+    acceptance_criteria: <span class="tok-type">list</span>[<span class="tok-type">str</span>]
+    affected_components: <span class="tok-type">list</span>[Literal[
+        <span class="tok-str">"glue_job"</span>,               <span class="tok-com"># upstream batch, S3 output</span>
+        <span class="tok-str">"enrichment_worker"</span>,      <span class="tok-com"># S3 → LLM → OpenSearch (write path)</span>
+        <span class="tok-str">"recommend_api"</span>,          <span class="tok-com"># /recommend endpoint (read path)</span>
+        <span class="tok-str">"enrichment_prompt"</span>,      <span class="tok-com"># LLM prompt for user profile enrichment</span>
+        <span class="tok-str">"reranker_prompt"</span>,        <span class="tok-com"># LLM prompt for reranker</span>
+        <span class="tok-str">"user_profile_index"</span>,     <span class="tok-com"># OpenSearch mapping for enriched profiles</span>
+        <span class="tok-str">"opensearch_query"</span>,       <span class="tok-com"># kNN / filter queries</span>
+    ]]
+    risk: Literal[<span class="tok-str">"low"</span>, <span class="tok-str">"medium"</span>, <span class="tok-str">"high"</span>]
+
+<span class="tok-key">class</span> <span class="tok-type">Artifact</span>(BaseModel):
+    path: <span class="tok-type">str</span>
+    kind: Literal[<span class="tok-str">"code"</span>, <span class="tok-str">"prompt"</span>, <span class="tok-str">"test"</span>, <span class="tok-str">"mapping"</span>, <span class="tok-str">"migration"</span>]
+    author_node: <span class="tok-type">str</span>
+    diff: <span class="tok-type">str</span>
+
+<span class="tok-key">class</span> <span class="tok-type">DevState</span>(TypedDict):
+    <span class="tok-com"># inputs</span>
+    task_id: <span class="tok-type">str</span>
+    task_text: <span class="tok-type">str</span>
+    trigger: Literal[<span class="tok-str">"ticket"</span>, <span class="tok-str">"slack"</span>, <span class="tok-str">"cron"</span>]
+
+    <span class="tok-com"># produced by early nodes</span>
+    repo_context: Optional[<span class="tok-type">dict</span>]      <span class="tok-com"># file list, symbols, patterns</span>
+    spec: Optional[Spec]
+    spec_approved: <span class="tok-type">bool</span>
+
+    <span class="tok-com"># planning</span>
+    work_graph: Optional[<span class="tok-type">dict</span>]        <span class="tok-com"># which workers to run and in what order</span>
+
+    <span class="tok-com"># workers produce these</span>
+    artifacts: <span class="tok-type">list</span>[Artifact]
+
+    <span class="tok-com"># verification</span>
+    test_results: Optional[<span class="tok-type">dict</span>]
+    prompt_eval_results: Optional[<span class="tok-type">dict</span>]
+    grader_verdict: Optional[Literal[<span class="tok-str">"pass"</span>, <span class="tok-str">"fail"</span>]]
+    grader_feedback: Optional[<span class="tok-type">str</span>]
+
+    <span class="tok-com"># control</span>
+    retry_count: <span class="tok-type">dict</span>[<span class="tok-type">str</span>, <span class="tok-type">int</span>]      <span class="tok-com"># per-node retry budget</span>
+    human_approvals: <span class="tok-type">list</span>[<span class="tok-type">str</span>]
+
+    <span class="tok-com"># output</span>
+    pr_url: Optional[<span class="tok-type">str</span>]
+    trace: <span class="tok-type">list</span>[<span class="tok-type">dict</span>]              <span class="tok-com"># every node's inputs/outputs, for audit</span>
+</code></pre>
+
+<div class="callout info">
+  <strong>Why typed state matters.</strong> The moment state becomes a free-form dict, every node has to guess what fields exist. Typed state turns node boundaries into contracts. Refactoring the graph is a mechanical exercise instead of an archaeology dig.
+</div>
+</section>
+
+<!-- ============================================================ -->
+<section id="nodes">
+<h2><span class="num">05</span>Node Catalog</h2>
+
+<p>Each node is a pure function <code>state → state</code> (or <code>state → partial state</code>). Model choice per node matters: use the strong model where judgment is required, the cheap model where mechanical work is needed.</p>
+
+<div class="node-grid">
+
+  <div class="node planner">
+    <div class="n-title">Intake / Router</div>
+    <div class="n-model"><span class="tag sonnet">Sonnet 4.6</span> <span class="tag tool">Linear · Slack</span></div>
+    <p class="n-desc">Normalizes the trigger into a canonical task. Rejects obvious junk. Classifies task type (feature / bug / maintenance / experiment).</p>
+  </div>
+
+  <div class="node worker">
+    <div class="n-title">Repo Context Explorer</div>
+    <div class="n-model"><span class="tag haiku">Haiku 4.5</span> <span class="tag tool">grep · read · index</span></div>
+    <p class="n-desc">Read-only. Finds relevant files, symbols, existing patterns. Produces a compact <code>repo_context</code>. Prevents downstream nodes from re-scanning.</p>
+  </div>
+
+  <div class="node planner">
+    <div class="n-title">Spec Architect</div>
+    <div class="n-model"><span class="tag opus">Opus 4.7</span></div>
+    <p class="n-desc">Turns the fuzzy task + repo context into a concrete spec: summary, acceptance criteria, affected components, risk level. This is where judgment lives.</p>
+  </div>
+
+  <div class="node human">
+    <div class="n-title">Human Checkpoint: Spec</div>
+    <div class="n-model"><span class="tag human">Engineer</span></div>
+    <p class="n-desc">Interrupt. Engineer reviews the spec in a UI (or Slack thread). Approves, edits, or rejects. Nothing gets coded before this passes.</p>
+  </div>
+
+  <div class="node planner">
+    <div class="n-title">Planner</div>
+    <div class="n-model"><span class="tag opus">Opus 4.7</span></div>
+    <p class="n-desc">Emits the <em>work graph</em> for this task — which workers to invoke, in what order, which can run in parallel. Adapts topology to affected components.</p>
+  </div>
+
+  <div class="node worker">
+    <div class="n-title">API Coder</div>
+    <div class="n-model"><span class="tag sonnet">Sonnet 4.6</span></div>
+    <p class="n-desc">Writes/edits FastAPI/Flask endpoints and service layer. Owns the <code>/recommend</code> path, request validation, error handling, response shape.</p>
+  </div>
+
+  <div class="node worker">
+    <div class="n-title">Glue Job Coder</div>
+    <div class="n-model"><span class="tag sonnet">Sonnet 4.6</span></div>
+    <p class="n-desc">Owns the upstream AWS Glue job that reads readership + subscription data and writes the base user profile to S3. PySpark / Glue DynamicFrame changes and the S3 output schema live here.</p>
+  </div>
+
+  <div class="node worker">
+    <div class="n-title">Enrichment Worker Coder</div>
+    <div class="n-model"><span class="tag sonnet">Sonnet 4.6</span></div>
+    <p class="n-desc">Owns the backend enrichment path: read base profile from S3, fetch recent-read docs from OpenSearch, invoke the LLM enrichment prompt, write enriched profile to the user-profile OpenSearch index. Triggering logic (event / schedule / lazy) lives here.</p>
+  </div>
+
+  <div class="node worker">
+    <div class="n-title">LLM Prompt Engineer</div>
+    <div class="n-model"><span class="tag opus">Opus 4.7</span></div>
+    <p class="n-desc">Specialist for the two LLM-bearing components: <strong>user profile enrichment</strong> (interests/topics from read history) and <strong>reranker</strong>. Owns prompt files, few-shot examples, output schemas, guardrails.</p>
+  </div>
+
+  <div class="node worker">
+    <div class="n-title">OpenSearch Coder</div>
+    <div class="n-model"><span class="tag sonnet">Sonnet 4.6</span></div>
+    <p class="n-desc">Owns index mappings, kNN queries, tag filters, embedding fields. Coordinates with the document team's index conventions.</p>
+  </div>
+
+  <div class="node worker">
+    <div class="n-title">Schema / Migration Coder</div>
+    <div class="n-model"><span class="tag sonnet">Sonnet 4.6</span></div>
+    <p class="n-desc">Any DB migration, index reindex plan, or breaking schema change. Runs only when the spec flags <code>schema</code> as affected.</p>
+  </div>
+
+  <div class="node worker">
+    <div class="n-title">Test Author</div>
+    <div class="n-model"><span class="tag sonnet">Sonnet 4.6</span></div>
+    <p class="n-desc">Writes unit + integration tests against the spec's acceptance criteria. Uses fixtures for OpenSearch and the ML library.</p>
+  </div>
+
+  <div class="node worker">
+    <div class="n-title">Prompt Eval Runner</div>
+    <div class="n-model"><span class="tag haiku">Haiku 4.5</span> <span class="tag tool">eval suite</span></div>
+    <p class="n-desc">Runs when the LLM Prompt Engineer changed a prompt. Executes the offline eval set (labeled examples) and compares to the prior baseline.</p>
+  </div>
+
+  <div class="node gate">
+    <div class="n-title">Integration Runner</div>
+    <div class="n-model"><span class="tag tool">pytest · lint · mypy</span></div>
+    <p class="n-desc">Deterministic. Runs the full test suite, linter, type check, and any component-specific validators. No LLM involved.</p>
+  </div>
+
+  <div class="node gate">
+    <div class="n-title">Grader</div>
+    <div class="n-model"><span class="tag opus">Opus 4.7</span></div>
+    <p class="n-desc">LLM verifier. Reads the spec, the diff, and test results. Judges: does this diff actually satisfy each acceptance criterion? Returns pass/fail with feedback.</p>
+  </div>
+
+  <div class="node human">
+    <div class="n-title">Human Checkpoint: PR</div>
+    <div class="n-model"><span class="tag human">Reviewer</span></div>
+    <p class="n-desc">Interrupt. Reviewer sees the diff, the trace, the grader's report, and prompt-eval deltas. Approve, request changes, or reject.</p>
+  </div>
+
+  <div class="node planner">
+    <div class="n-title">PR Publisher</div>
+    <div class="n-model"><span class="tag tool">git · gh</span></div>
+    <p class="n-desc">Creates the branch, commits per-node artifacts with authorship attribution, opens the PR with a body that summarizes the trace.</p>
+  </div>
+
+</div>
+</section>
+
+<!-- ============================================================ -->
+<section id="routing">
+<h2><span class="num">06</span>Routing Rules &amp; Human Checkpoints</h2>
+
+<h3>Conditional routing (edges)</h3>
+<table>
+  <thead><tr><th>From</th><th>Condition</th><th>To</th></tr></thead>
+  <tbody>
+    <tr><td>Spec Architect</td><td>ambiguous / missing context</td><td>Repo Context Explorer (2nd pass)</td></tr>
+    <tr><td>Human: Spec</td><td>rejected</td><td>Spec Architect (with feedback)</td></tr>
+    <tr><td>Planner</td><td>affected = [api, opensearch]</td><td>API Coder ∥ OpenSearch Coder</td></tr>
+    <tr><td>Planner</td><td>affected includes llm_prompt</td><td>+ LLM Prompt Engineer + Prompt Eval Runner</td></tr>
+    <tr><td>Integration Runner</td><td>tests fail</td><td>route to failing component's coder</td></tr>
+    <tr><td>Prompt Eval Runner</td><td>regression vs baseline</td><td>LLM Prompt Engineer (with delta report)</td></tr>
+    <tr><td>Grader</td><td>fail, retry_count &lt; 2</td><td>most relevant coder</td></tr>
+    <tr><td>Grader</td><td>fail, retry_count ≥ 2</td><td>escalate to human</td></tr>
+    <tr><td>Human: PR</td><td>changes requested</td><td>Planner (mini re-plan)</td></tr>
+  </tbody>
+</table>
+
+<h3>Where humans must be in the loop</h3>
+<div class="callout warn">
+  <strong>Non-negotiable checkpoints for a recommendation system.</strong> These are places where a fully autonomous graph will eventually cause an outage or a bad user experience. Keep the human interrupt.
+  <ul style="margin-top:8px; margin-bottom:0">
+    <li><strong>Spec approval</strong> — before any code is written for anything user-facing.</li>
+    <li><strong>Prompt changes to prod</strong> — the LLM prompt for user-profile enrichment or reranker shapes what every user sees. Never merge without eyes.</li>
+    <li><strong>OpenSearch mapping changes</strong> — irreversible at scale. Require human sign-off.</li>
+    <li><strong>PR review</strong> — even if the grader passes, a human reviews the merged diff.</li>
+  </ul>
+</div>
+
+<h3>Bounded cycles</h3>
+<p>Every retry edge carries a budget. If the API Coder fails the grader twice, the graph does not loop forever — it escalates. This is the single most important discipline that graph engineering enforces that prompt/loop engineering does not.</p>
+</section>
+
+<!-- ============================================================ -->
+<section id="example">
+<h2><span class="num">07</span>Worked Example: Building User-Profile Enrichment</h2>
+
+<p>Concrete task: "Add a new interest-extraction field <code>preferred_topics</code> to the enriched user profile, populated by an LLM prompt over the last 30 days of readership, and store it in the OpenSearch user-profile index."</p>
+
+<div class="diagram">
+<pre>
+  1. Intake              ─▶ classifies as: feature,
+                              affects [enrichment_prompt, enrichment_worker, user_profile_index]
+                              (Glue job untouched — base profile already carries read history)
+
+  2. Repo Explorer       ─▶ finds: prompts/enrichment.md
+                                   workers/enrichment_worker.py
+                                   opensearch/mappings/user_profile.json
+                                   evals/enrichment_eval_set.jsonl
+                                   tests/test_enrichment_worker.py
+
+  3. Spec Architect      ─▶ produces spec:
+                              AC1: preferred_topics is list[str], max 20 items
+                              AC2: enrichment uses last 30d of reads from base profile (S3)
+                              AC3: user_profile OpenSearch mapping updated with keyword field
+                              AC4: existing enriched profile fields unchanged
+                              AC5: eval suite shows ≥ 0.75 precision on labeled set
+                              AC6: backfill plan for existing enriched profiles
+                              risk: medium (prompt change reaches all users' next enrichment)
+
+  4. HUMAN: Spec         ─▶ engineer edits AC5 to require ≥ 0.80 precision → approves
+
+  5. Planner             ─▶ work graph:
+                              parallel: [LLM Prompt Engineer,
+                                         OpenSearch Coder,
+                                         Enrichment Worker Coder]
+                              then:     [Test Author, Prompt Eval Runner]
+                              then:     Integration Runner → Grader
+
+  6. Parallel workers:
+       LLM Prompt Engineer      ─▶ updates prompts/enrichment.md
+                                    (adds preferred_topics section, few-shot examples,
+                                     tightens JSON schema)
+       OpenSearch Coder         ─▶ adds preferred_topics field to user_profile mapping,
+                                    writes reindex-in-place plan for AC6 backfill
+       Enrichment Worker Coder  ─▶ extends S3-read → LLM-enrich → OpenSearch-write path
+                                    to carry preferred_topics through end to end
+
+  7. Test Author           ─▶ adds tests for AC1–AC4 (fixture-based)
+
+  8. Prompt Eval Runner    ─▶ runs 200-example eval set. Precision = 0.72 → REGRESSION
+
+  9. Route: Prompt Eval → LLM Prompt Engineer (with delta report)
+        LLM Prompt Engineer tweaks prompt (adds "prefer specific over general" rule,
+        adjusts few-shot examples), reruns → 0.83
+
+ 10. Integration Runner    ─▶ all tests pass, mypy clean, lint clean
+
+ 11. Grader (LLM)          ─▶ reads diff + spec + eval numbers → PASS with note:
+                              "consider adding index reindex procedure to PR body"
+
+ 12. HUMAN: PR             ─▶ reviewer approves; PR merged
+
+ 13. Trace written back to Linear ticket with node-by-node summary
+</pre>
+</div>
+
+<p>Notice what the graph gave you that a single Claude Code loop would not:</p>
+<ul>
+  <li>The prompt regression was <strong>caught by an evaluator node</strong>, not by the coding agent noticing something felt off.</li>
+  <li>Three components were built <strong>in parallel</strong> instead of sequentially.</li>
+  <li>The spec was a <strong>hard gate</strong> — the engineer changed AC5 before a single line was written.</li>
+  <li>Every artifact carries an <strong>authoring node</strong>, so the PR body can attribute changes.</li>
+</ul>
+</section>
+
+<!-- ============================================================ -->
+<section id="impl">
+<h2><span class="num">08</span>Implementation with LangGraph + Claude Agent SDK</h2>
+
+<p>Concrete stack:</p>
+
+<ul>
+  <li><strong>LangGraph</strong> — the orchestration layer. Nodes, edges, state, checkpoints, interrupts.</li>
+  <li><strong>Claude Agent SDK</strong> (or Claude Code as a subprocess) — the actual coding agent inside worker nodes. Each worker gets its own filesystem sandbox / worktree.</li>
+  <li><strong>Postgres or SQLite checkpointer</strong> — durable state so a graph run survives restarts and human interrupts across days.</li>
+  <li><strong>Your existing CI (pytest, mypy, lint)</strong> — called directly from the Integration Runner node.</li>
+  <li><strong>An eval harness</strong> for the LLM prompts (labeled examples + a scorer). Owned by your team, invoked by the Prompt Eval Runner.</li>
+</ul>
+
+<h3>Skeleton</h3>
+
+<pre><code><span class="tok-key">from</span> langgraph.graph <span class="tok-key">import</span> StateGraph, START, END
+<span class="tok-key">from</span> langgraph.checkpoint.postgres <span class="tok-key">import</span> PostgresSaver
+<span class="tok-key">from</span> langgraph.types <span class="tok-key">import</span> interrupt
+
+<span class="tok-com"># --- Node functions (each returns a partial state update) ---</span>
+
+<span class="tok-key">def</span> <span class="tok-fn">intake</span>(state: DevState) -> <span class="tok-type">dict</span>:
+    <span class="tok-key">return</span> {<span class="tok-str">"task_text"</span>: normalize(state[<span class="tok-str">"task_text"</span>])}
+
+<span class="tok-key">def</span> <span class="tok-fn">repo_explorer</span>(state: DevState) -> <span class="tok-type">dict</span>:
+    ctx = run_claude_readonly(state[<span class="tok-str">"task_text"</span>], tools=[<span class="tok-str">"grep"</span>, <span class="tok-str">"read"</span>])
+    <span class="tok-key">return</span> {<span class="tok-str">"repo_context"</span>: ctx}
+
+<span class="tok-key">def</span> <span class="tok-fn">spec_architect</span>(state: DevState) -> <span class="tok-type">dict</span>:
+    spec = claude_opus.produce_spec(state[<span class="tok-str">"task_text"</span>], state[<span class="tok-str">"repo_context"</span>])
+    <span class="tok-key">return</span> {<span class="tok-str">"spec"</span>: spec}
+
+<span class="tok-key">def</span> <span class="tok-fn">human_spec_gate</span>(state: DevState) -> <span class="tok-type">dict</span>:
+    approval = interrupt({<span class="tok-str">"kind"</span>: <span class="tok-str">"spec_review"</span>, <span class="tok-str">"spec"</span>: state[<span class="tok-str">"spec"</span>]})
+    <span class="tok-key">return</span> {<span class="tok-str">"spec"</span>: approval[<span class="tok-str">"spec"</span>], <span class="tok-str">"spec_approved"</span>: approval[<span class="tok-str">"ok"</span>]}
+
+<span class="tok-key">def</span> <span class="tok-fn">llm_prompt_engineer</span>(state: DevState) -> <span class="tok-type">dict</span>:
+    artifact = claude_opus.edit_prompt_file(state[<span class="tok-str">"spec"</span>], state[<span class="tok-str">"repo_context"</span>])
+    <span class="tok-key">return</span> {<span class="tok-str">"artifacts"</span>: state[<span class="tok-str">"artifacts"</span>] + [artifact]}
+
+<span class="tok-key">def</span> <span class="tok-fn">prompt_eval_runner</span>(state: DevState) -> <span class="tok-type">dict</span>:
+    result = run_eval_suite(prompt_paths_in(state[<span class="tok-str">"artifacts"</span>]))
+    <span class="tok-key">return</span> {<span class="tok-str">"prompt_eval_results"</span>: result}
+
+<span class="tok-com"># ... other worker nodes similarly ...</span>
+
+<span class="tok-com"># --- Routing ---</span>
+
+<span class="tok-key">def</span> <span class="tok-fn">route_after_planner</span>(state: DevState) -> <span class="tok-type">list</span>[<span class="tok-type">str</span>]:
+    components = state[<span class="tok-str">"spec"</span>].affected_components
+    workers = []
+    <span class="tok-key">if</span> <span class="tok-str">"glue_job"</span>            <span class="tok-key">in</span> components: workers.append(<span class="tok-str">"glue_job_coder"</span>)
+    <span class="tok-key">if</span> <span class="tok-str">"enrichment_worker"</span>   <span class="tok-key">in</span> components: workers.append(<span class="tok-str">"enrichment_worker_coder"</span>)
+    <span class="tok-key">if</span> <span class="tok-str">"recommend_api"</span>       <span class="tok-key">in</span> components: workers.append(<span class="tok-str">"api_coder"</span>)
+    <span class="tok-key">if</span> <span class="tok-str">"enrichment_prompt"</span>   <span class="tok-key">in</span> components: workers.append(<span class="tok-str">"llm_prompt_engineer"</span>)
+    <span class="tok-key">if</span> <span class="tok-str">"reranker_prompt"</span>     <span class="tok-key">in</span> components: workers.append(<span class="tok-str">"llm_prompt_engineer"</span>)
+    <span class="tok-key">if</span> <span class="tok-str">"user_profile_index"</span>  <span class="tok-key">in</span> components: workers.append(<span class="tok-str">"opensearch_coder"</span>)
+    <span class="tok-key">if</span> <span class="tok-str">"opensearch_query"</span>    <span class="tok-key">in</span> components: workers.append(<span class="tok-str">"opensearch_coder"</span>)
+    <span class="tok-key">return</span> <span class="tok-type">list</span>(<span class="tok-type">set</span>(workers))   <span class="tok-com"># dedupe; LangGraph fans out in parallel</span>
+
+<span class="tok-key">def</span> <span class="tok-fn">route_after_grader</span>(state: DevState) -> <span class="tok-type">str</span>:
+    <span class="tok-key">if</span> state[<span class="tok-str">"grader_verdict"</span>] == <span class="tok-str">"pass"</span>:
+        <span class="tok-key">return</span> <span class="tok-str">"human_pr_gate"</span>
+    <span class="tok-key">if</span> state[<span class="tok-str">"retry_count"</span>].get(<span class="tok-str">"grader"</span>, <span class="tok-num">0</span>) &gt;= <span class="tok-num">2</span>:
+        <span class="tok-key">return</span> <span class="tok-str">"escalate_to_human"</span>
+    <span class="tok-key">return</span> pick_failing_specialist(state)
+
+<span class="tok-com"># --- Wire the graph ---</span>
+
+g = StateGraph(DevState)
+<span class="tok-key">for</span> name, fn <span class="tok-key">in</span> NODES.items():
+    g.add_node(name, fn)
+
+g.add_edge(START, <span class="tok-str">"intake"</span>)
+g.add_edge(<span class="tok-str">"intake"</span>, <span class="tok-str">"repo_explorer"</span>)
+g.add_edge(<span class="tok-str">"repo_explorer"</span>, <span class="tok-str">"spec_architect"</span>)
+g.add_edge(<span class="tok-str">"spec_architect"</span>, <span class="tok-str">"human_spec_gate"</span>)
+g.add_conditional_edges(<span class="tok-str">"human_spec_gate"</span>,
+    <span class="tok-key">lambda</span> s: <span class="tok-str">"planner"</span> <span class="tok-key">if</span> s[<span class="tok-str">"spec_approved"</span>] <span class="tok-key">else</span> <span class="tok-str">"spec_architect"</span>)
+g.add_conditional_edges(<span class="tok-str">"planner"</span>, route_after_planner)
+
+<span class="tok-com"># all workers fan-in to test_author + prompt_eval_runner</span>
+<span class="tok-key">for</span> w <span class="tok-key">in</span> WORKER_NODES:
+    g.add_edge(w, <span class="tok-str">"test_author"</span>)
+g.add_edge(<span class="tok-str">"llm_prompt_engineer"</span>, <span class="tok-str">"prompt_eval_runner"</span>)
+
+g.add_edge(<span class="tok-str">"test_author"</span>, <span class="tok-str">"integration_runner"</span>)
+g.add_edge(<span class="tok-str">"prompt_eval_runner"</span>, <span class="tok-str">"integration_runner"</span>)
+g.add_edge(<span class="tok-str">"integration_runner"</span>, <span class="tok-str">"grader"</span>)
+g.add_conditional_edges(<span class="tok-str">"grader"</span>, route_after_grader)
+g.add_edge(<span class="tok-str">"human_pr_gate"</span>, <span class="tok-str">"pr_publisher"</span>)
+g.add_edge(<span class="tok-str">"pr_publisher"</span>, END)
+
+app = g.compile(checkpointer=PostgresSaver.from_conn_string(DSN))
+</code></pre>
+
+<div class="callout info">
+  <strong>Worktrees per worker.</strong> Give every coder node its own git worktree so parallel edits do not collide. Merge back at the fan-in point (Test Author sees a combined view). This is the same pattern the graph itself embodies at the code level.
+</div>
+</section>
+
+<!-- ============================================================ -->
+<section id="rollout">
+<h2><span class="num">09</span>Phased Rollout</h2>
+
+<p>Do not build the whole graph on day one. Ship it in three phases.</p>
+
+<h3>Phase 1 — Linear pipeline (2–3 weeks)</h3>
+<ul>
+  <li>Nodes: Intake → Repo Explorer → Spec Architect → Human Gate → single Coder → Integration Runner → Human PR Gate → PR Publisher.</li>
+  <li>No parallelism yet. No grader. No prompt eval. No specialist workers.</li>
+  <li>Goal: prove the checkpointer works, humans get sensible interrupts, PRs are clean.</li>
+</ul>
+
+<h3>Phase 2 — Specialization + fan-out (3–4 weeks)</h3>
+<ul>
+  <li>Add Planner, split Coder into API / Data / OpenSearch / LLM Prompt specialists.</li>
+  <li>Add Test Author as a distinct node.</li>
+  <li>Add parallel fan-out from Planner. Introduce per-worker worktrees.</li>
+</ul>
+
+<h3>Phase 3 — Verification + self-improvement (ongoing)</h3>
+<ul>
+  <li>Add Grader and Prompt Eval Runner.</li>
+  <li>Add bounded-retry cycles.</li>
+  <li>Start collecting traces to a store; use them to refine prompts (hill-climbing loop from Level 4 of loop engineering).</li>
+</ul>
+</section>
+
+<!-- ============================================================ -->
+<section id="antipatterns">
+<h2><span class="num">10</span>Anti-Patterns to Avoid</h2>
+
+<table>
+  <thead><tr><th>Anti-pattern</th><th>Why it hurts</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>One giant "coder" node that does everything</td>
+      <td>Collapses back to loop engineering. You lose specialization, parallelism, and per-domain retry.</td>
+    </tr>
+    <tr>
+      <td>Free-form dict as state</td>
+      <td>Nodes drift, contracts erode, refactors get scary. Use Pydantic or TypedDict from day one.</td>
+    </tr>
+    <tr>
+      <td>No retry budget</td>
+      <td>Graphs cycle infinitely on tricky bugs and burn tokens. Every retry edge needs a numeric bound.</td>
+    </tr>
+    <tr>
+      <td>Grader written by the same author as the coder</td>
+      <td>Grader becomes a rubber stamp. Keep the grader's prompt and evaluation criteria owned by a different engineer.</td>
+    </tr>
+    <tr>
+      <td>Human checkpoints on every node</td>
+      <td>You lose the leverage of automation. Checkpoints belong at high-risk gates only (spec, prod-touching prompt, schema, merge).</td>
+    </tr>
+    <tr>
+      <td>Prompt changes without an eval suite</td>
+      <td>Every prompt change is a silent product change. For the reranker especially, no eval means no signal.</td>
+    </tr>
+    <tr>
+      <td>Building the graph before you have working loops</td>
+      <td>You cannot organize agents that do not yet work individually. Get each node's loop reliable in isolation first.</td>
+    </tr>
+    <tr>
+      <td>No trace / no observability</td>
+      <td>When something goes wrong at 2am, you will need to know which node did what with which state. Log every node transition.</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout">
+  <strong>Closing thought.</strong> The dev graph is not a replacement for your team's engineering judgment — it is an amplifier for it. The graph shape is a codified statement of <em>how your team wants to build software</em>. Change the graph as your team's practices evolve.
+</div>
+</section>
+
+<footer>
+  Generated for the recommendation backend project · <a href="./index.html">← back to the general research doc</a>
+</footer>
+
+</div>
+</body>
+</html>

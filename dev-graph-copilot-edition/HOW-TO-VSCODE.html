@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dev-Graph Copilot Edition — VS Code Setup Guide</title>
+<style>
+  :root {
+    --bg: #0e1117;
+    --bg-card: #161b22;
+    --bg-code: #0a0d12;
+    --border: #30363d;
+    --border-soft: #21262d;
+    --text: #e6edf3;
+    --text-dim: #8b949e;
+    --text-muted: #6e7681;
+    --accent: #58a6ff;
+    --accent-2: #a371f7;
+    --accent-3: #3fb950;
+    --accent-warn: #f0883e;
+    --accent-graph: #f778ba;
+    --accent-red: #ff7b72;
+    --code: #d2a8ff;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, system-ui, sans-serif;
+    --font-mono: "SF Mono", Monaco, Menlo, Consolas, "Liberation Mono", monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    line-height: 1.65;
+    font-size: 16px;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 40px 24px 96px; }
+
+  header.hero {
+    padding: 36px 0 28px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 36px;
+  }
+  .eyebrow {
+    color: var(--accent-graph);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  h1 {
+    font-size: 38px;
+    line-height: 1.15;
+    margin: 0 0 14px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+  h1 .accent { color: var(--accent-graph); }
+  .subtitle { font-size: 17px; color: var(--text-dim); margin: 0; max-width: 760px; }
+
+  h2 {
+    font-size: 26px;
+    margin: 52px 0 18px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  h2 .num {
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 17px;
+    margin-right: 12px;
+    font-weight: 500;
+  }
+  h3 { font-size: 20px; margin: 32px 0 10px; font-weight: 700; }
+  h4 {
+    font-size: 14px; margin: 18px 0 6px;
+    font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--text);
+  }
+  p { margin: 0 0 14px; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  code {
+    font-family: var(--font-mono);
+    background: var(--bg-code);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 13px;
+    color: var(--code);
+    border: 1px solid var(--border-soft);
+  }
+  pre {
+    background: var(--bg-code);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 18px;
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    line-height: 1.6;
+    margin: 16px 0;
+  }
+  pre code { background: transparent; padding: 0; border: none; color: var(--text); }
+  .tok-key { color: #ff7b72; }
+  .tok-str { color: #a5d6ff; }
+  .tok-com { color: var(--text-muted); font-style: italic; }
+  .tok-yml { color: #ffa657; }
+
+  kbd {
+    display: inline-block;
+    padding: 2px 7px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text);
+    background: var(--bg-code);
+    border: 1px solid var(--border);
+    border-bottom-width: 2px;
+    border-radius: 4px;
+    margin: 0 2px;
+  }
+
+  ul, ol { padding-left: 22px; margin: 10px 0 18px; }
+  li { margin-bottom: 6px; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 18px 0;
+    font-size: 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border-soft); vertical-align: top; }
+  th { background: var(--bg-card); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+  tr:last-child td { border-bottom: none; }
+  tr:nth-child(even) td { background: rgba(255,255,255,0.015); }
+
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin: 16px 0;
+  }
+
+  .step {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    padding: 18px 22px;
+    margin: 14px 0;
+  }
+  .step .step-num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .step .step-title {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .callout {
+    background: rgba(88,166,255,0.06);
+    border: 1px solid rgba(88,166,255,0.25);
+    border-left: 3px solid var(--accent);
+    padding: 14px 18px;
+    border-radius: 6px;
+    margin: 16px 0;
+    font-size: 14.5px;
+  }
+  .callout strong { color: var(--accent); }
+  .callout.warn { background: rgba(240,136,62,0.06); border-color: rgba(240,136,62,0.25); border-left-color: var(--accent-warn); }
+  .callout.warn strong { color: var(--accent-warn); }
+  .callout.tip { background: rgba(63,185,80,0.06); border-color: rgba(63,185,80,0.25); border-left-color: var(--accent-3); }
+  .callout.tip strong { color: var(--accent-3); }
+  .callout.graph { background: rgba(247,120,186,0.06); border-color: rgba(247,120,186,0.25); border-left-color: var(--accent-graph); }
+  .callout.graph strong { color: var(--accent-graph); }
+
+  .mode-grid, .prompt-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 14px;
+    margin: 18px 0;
+  }
+  .mode {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 18px;
+    border-left: 3px solid var(--accent-graph);
+  }
+  .mode.coder { border-left-color: var(--accent-3); }
+  .mode.grader { border-left-color: var(--accent-warn); }
+  .mode.prompt-engineer { border-left-color: var(--accent-2); }
+  .mode .m-title {
+    font-weight: 700;
+    font-size: 15px;
+    margin-bottom: 4px;
+    font-family: var(--font-mono);
+  }
+  .mode .m-role {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+  }
+  .mode .m-desc { font-size: 13.5px; color: var(--text-dim); margin: 0; }
+
+  .tag {
+    display: inline-block;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    margin: 2px 3px 2px 0;
+    background: rgba(88,166,255,0.14);
+    color: var(--accent);
+    border: 1px solid rgba(88,166,255,0.3);
+  }
+  .tag.write { background: rgba(63,185,80,0.14); color: var(--accent-3); border-color: rgba(63,185,80,0.3); }
+  .tag.read { background: rgba(88,166,255,0.14); color: var(--accent); border-color: rgba(88,166,255,0.3); }
+  .tag.strong { background: rgba(163,113,247,0.14); color: var(--accent-2); border-color: rgba(163,113,247,0.3); }
+
+  .ui-mock {
+    background: var(--bg-code);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    line-height: 1.7;
+    color: var(--text);
+    overflow-x: auto;
+  }
+  .ui-mock pre { background: none; border: none; padding: 0; margin: 0; }
+
+  .toc {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 18px 24px;
+    margin: 24px 0;
+  }
+  .toc-title { font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); font-weight: 600; margin-bottom: 10px; }
+  .toc ol { margin: 0; padding-left: 22px; }
+  .toc li { margin-bottom: 5px; font-size: 14px; }
+  .toc a { color: var(--text); }
+  .toc a:hover { color: var(--accent-graph); }
+
+  footer {
+    margin-top: 72px;
+    padding-top: 28px;
+    border-top: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 13px;
+  }
+
+  @media (max-width: 700px) {
+    h1 { font-size: 28px; }
+    h2 { font-size: 20px; }
+    .wrap { padding: 22px 14px 60px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <div class="eyebrow">Setup Guide · Copilot Edition</div>
+  <h1>Using <span class="accent">Dev-Graph</span> with GitHub Copilot Chat in VS Code</h1>
+  <p class="subtitle">Install four custom chat modes and four prompts, then run the recommendation-backend workflow entirely from the Copilot Chat panel. No API keys required.</p>
+</header>
+
+<nav class="toc">
+  <div class="toc-title">Contents</div>
+  <ol>
+    <li><a href="#prereq">Prerequisites</a></li>
+    <li><a href="#install">Install into your repo</a></li>
+    <li><a href="#reload">Reload VS Code &amp; verify</a></li>
+    <li><a href="#models">Pick a model per mode</a></li>
+    <li><a href="#modes">The four chat modes</a></li>
+    <li><a href="#prompts">The four prompts</a></li>
+    <li><a href="#first-task">Run your first task, click by click</a></li>
+    <li><a href="#adaptive">Adaptive behavior: reading the codebase &amp; adjusting</a></li>
+    <li><a href="#ui">VS Code UI reference</a></li>
+    <li><a href="#tips">Tips, gotchas &amp; anti-patterns</a></li>
+    <li><a href="#troubleshoot">Troubleshooting</a></li>
+  </ol>
+</nav>
+
+<!-- ============================================================ -->
+<section id="prereq">
+<h2><span class="num">01</span>Prerequisites</h2>
+
+<ul>
+  <li><strong>VS Code</strong> — recent version (1.90+, ideally the latest stable). Custom chat modes and prompt files are relatively new features.</li>
+  <li><strong>GitHub Copilot Chat extension</strong> — installed and signed in. Verify the Copilot icon appears in your activity bar.</li>
+  <li><strong>Copilot subscription with model access</strong> — Business/Enterprise plans typically expose Claude Sonnet/Opus and GPT-5 in the model picker.</li>
+  <li><strong>Your recommendation-backend repo</strong> — checked out locally, and you're allowed to add a <code>.github/</code> folder to it (or a personal fork if not).</li>
+  <li><strong>The Copilot-edition bundle</strong> — <code>dev-graph-copilot-edition.bundle</code> (or an unpacked copy of the kit).</li>
+</ul>
+
+<div class="callout warn">
+  <strong>Feature availability.</strong> Custom chat modes (<code>.chatmode.md</code>) and prompt files (<code>.prompt.md</code>) are documented Copilot features but their UI location and enablement flags evolve. If a step below doesn't match your VS Code, check the <em>Chat: Prompt Files</em> and <em>Chat: Mode Files Locations</em> settings — you may need to explicitly point Copilot at <code>.github/chatmodes/</code> and <code>.github/prompts/</code>.
+</div>
+</section>
+
+<!-- ============================================================ -->
+<section id="install">
+<h2><span class="num">02</span>Install into your repo</h2>
+
+<p>The kit is designed to live inside your target repo so Copilot picks it up automatically for that workspace.</p>
+
+<h3>If you have the git bundle</h3>
+
+<pre><code><span class="tok-com"># 1. Unpack the bundle to a scratch location</span>
+mkdir ~/tmp/copilot-kit &amp;&amp; cd ~/tmp/copilot-kit
+git clone /path/to/dev-graph-copilot-edition.bundle .
+
+<span class="tok-com"># 2. Copy the .github/ folder and workflow doc into your repo</span>
+cd /path/to/your/recommendation-backend-repo
+cp -R ~/tmp/copilot-kit/.github .
+cp ~/tmp/copilot-kit/WORKFLOW.md .
+cp -R ~/tmp/copilot-kit/examples .
+
+<span class="tok-com"># 3. Commit onto a branch and share with the team</span>
+git checkout -b devgraph/install-copilot-modes
+git add .github/ WORKFLOW.md examples/
+git commit -m "devgraph: add Copilot chat modes and prompts"
+git push -u origin devgraph/install-copilot-modes
+</code></pre>
+
+<h3>If you already have a <code>.github/</code> folder</h3>
+
+<p>Merge, don't overwrite. The subfolders (<code>chatmodes/</code>, <code>prompts/</code>) and <code>copilot-instructions.md</code> should not conflict with typical repo contents, but check first.</p>
+
+<pre><code>ls .github/                     <span class="tok-com"># see what's already there</span>
+cp -R ~/tmp/copilot-kit/.github/chatmodes .github/
+cp -R ~/tmp/copilot-kit/.github/prompts .github/
+
+<span class="tok-com"># If copilot-instructions.md already exists, merge manually.</span>
+diff ~/tmp/copilot-kit/.github/copilot-instructions.md .github/copilot-instructions.md
+</code></pre>
+
+<div class="callout tip">
+  <strong>Alternate placement.</strong> If your team prefers not to check these into the repo, place the files under <code>.vscode/chatmodes/</code> and <code>.vscode/prompts/</code> instead (workspace-scoped, not repo-scoped). Update <code>chat.modeFilesLocations</code> and <code>chat.promptFilesLocations</code> in <code>.vscode/settings.json</code> to point there.
+</div>
+</section>
+
+<!-- ============================================================ -->
+<section id="reload">
+<h2><span class="num">03</span>Reload VS Code &amp; verify</h2>
+
+<div class="step">
+  <div class="step-num">Step 3.1</div>
+  <div class="step-title">Reload the window</div>
+  <p>Press <kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> (or <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> on Windows/Linux) → type <code>Developer: Reload Window</code> → <kbd>Enter</kbd>.</p>
+</div>
+
+<div class="step">
+  <div class="step-num">Step 3.2</div>
+  <div class="step-title">Open Copilot Chat</div>
+  <p>Press <kbd>Ctrl</kbd>+<kbd>Cmd</kbd>+<kbd>I</kbd> to open the chat panel, or click the Copilot icon in the activity bar and pick <em>Chat</em>.</p>
+</div>
+
+<div class="step">
+  <div class="step-num">Step 3.3</div>
+  <div class="step-title">Verify the four chat modes</div>
+  <p>At the top of the chat panel, click the <strong>mode picker</strong> (usually shows "Ask", "Edit", "Agent"). You should now also see:</p>
+  <div class="ui-mock">
+<pre>Mode picker ▾
+├── Ask                       (built-in)
+├── Edit                      (built-in)
+├── Agent                     (built-in)
+├── Spec Architect            ← from .github/chatmodes/
+├── Coder                     ← from .github/chatmodes/
+├── Grader                    ← from .github/chatmodes/
+└── LLM Prompt Engineer       ← from .github/chatmodes/</pre>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-num">Step 3.4</div>
+  <div class="step-title">Verify the four prompts</div>
+  <p>In the chat input box, type <code>/</code>. A dropdown should appear with the built-in Copilot slash commands plus the custom prompts:</p>
+  <div class="ui-mock">
+<pre>/                              (start typing to filter)
+├── /explain                  (built-in)
+├── /fix                      (built-in)
+├── /new-task                 ← from .github/prompts/
+├── /review-spec              ← from .github/prompts/
+├── /coder-input              ← from .github/prompts/
+└── /pr-body                  ← from .github/prompts/</pre>
+  </div>
+  <p>If they don't appear, jump to <a href="#troubleshoot">Troubleshooting</a>.</p>
+</div>
+
+<div class="step">
+  <div class="step-num">Step 3.5</div>
+  <div class="step-title">Verify always-on instructions</div>
+  <p>Open a fresh chat in <strong>Ask</strong> mode. Type: <code>What are the two runtime paths of this backend?</code></p>
+  <p>Copilot should describe the write-path enrichment pipeline (Glue → S3 → enrichment worker → OpenSearch) and the read-path <code>/recommend</code> API. That confirms <code>.github/copilot-instructions.md</code> is being auto-loaded.</p>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<section id="models">
+<h2><span class="num">04</span>Pick a model per mode</h2>
+
+<p>Every mode has an independent model picker. Set each once and Copilot remembers your choice.</p>
+
+<table>
+  <thead>
+    <tr><th>Mode</th><th>Recommended model class</th><th>Why</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Spec Architect</strong></td>
+      <td><span class="tag strong">Strong reasoning</span><br>Claude Opus 4.x · GPT-5</td>
+      <td>Producing testable acceptance criteria requires judgment. A weaker model produces vague ACs.</td>
+    </tr>
+    <tr>
+      <td><strong>Coder</strong></td>
+      <td><span class="tag">Capable coding</span><br>Claude Sonnet 4.x · GPT-5</td>
+      <td>You want fast, high-throughput edits. Sonnet-class models are the sweet spot for iterative file editing in Agent mode.</td>
+    </tr>
+    <tr>
+      <td><strong>Grader</strong></td>
+      <td><span class="tag strong">Strong reasoning</span><br>Claude Opus 4.x · GPT-5</td>
+      <td>Independent verification benefits from the strongest model available. Do not use the same model as the Coder if you can help it — cross-model verification catches more.</td>
+    </tr>
+    <tr>
+      <td><strong>LLM Prompt Engineer</strong></td>
+      <td><span class="tag strong">Strong reasoning</span><br>Claude Opus 4.x · GPT-5</td>
+      <td>Prompt tweaks look tiny but have large downstream effects. Use the strongest model to evaluate wording changes.</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout tip">
+  <strong>To set the model:</strong> switch to the mode, click the model picker (next to the mode picker at the top of the chat panel), select your model. That's it — no config file to edit.
+</div>
+</section>
+
+<!-- ============================================================ -->
+<section id="modes">
+<h2><span class="num">05</span>The four chat modes</h2>
+
+<p>Each mode is a saved system prompt with a specific tool allowlist. Switching modes is like switching specialists.</p>
+
+<div class="mode-grid">
+
+  <div class="mode">
+    <div class="m-title">Spec Architect</div>
+    <div class="m-role">Read-only · JSON output</div>
+    <p class="m-desc">Turns a fuzzy task into a testable JSON spec with acceptance criteria, affected components, and a risk level. Cannot edit files. Refuses to invent requirements — asks clarifying questions when needed.</p>
+    <div style="margin-top: 8px">
+      <span class="tag read">codebase</span><span class="tag read">search</span><span class="tag read">usages</span>
+    </div>
+  </div>
+
+  <div class="mode coder">
+    <div class="m-title">Coder</div>
+    <div class="m-role">Agent mode · Edits + commands</div>
+    <p class="m-desc">Implements an approved spec by reading files, proposing edits, and running commands. Enforces minimum-change discipline. Stops when done and summarizes which AC each edit addresses.</p>
+    <div style="margin-top: 8px">
+      <span class="tag read">codebase</span><span class="tag read">search</span><span class="tag write">editFiles</span><span class="tag write">runCommands</span>
+    </div>
+  </div>
+
+  <div class="mode grader">
+    <div class="m-title">Grader</div>
+    <div class="m-role">Read-only · JSON verdict</div>
+    <p class="m-desc">Verifies a diff against the approved spec. Returns pass/fail per AC with actionable feedback. Independence rule: use a different model than the Coder, and open a fresh chat (no context bleed).</p>
+    <div style="margin-top: 8px">
+      <span class="tag read">codebase</span><span class="tag read">search</span><span class="tag read">usages</span>
+    </div>
+  </div>
+
+  <div class="mode prompt-engineer">
+    <div class="m-title">LLM Prompt Engineer</div>
+    <div class="m-role">Prompt files only</div>
+    <p class="m-desc">Owns the enrichment and reranker prompts. Can edit files under <code>prompts/</code> but not application code. Refuses to ship prompt changes without an eval-suite delta.</p>
+    <div style="margin-top: 8px">
+      <span class="tag read">codebase</span><span class="tag read">search</span><span class="tag write">editFiles</span>
+    </div>
+  </div>
+
+</div>
+</section>
+
+<!-- ============================================================ -->
+<section id="prompts">
+<h2><span class="num">06</span>The four prompts</h2>
+
+<p>Prompts are reusable inputs. Invoke by typing <code>/name</code> in the chat input. Each prompt is bound to the mode it makes sense in — invoking <code>/new-task</code> auto-switches you to Spec Architect mode.</p>
+
+<div class="prompt-grid">
+  <div class="mode">
+    <div class="m-title">/new-task</div>
+    <div class="m-role">→ Spec Architect</div>
+    <p class="m-desc">Kicks off a new engineering task. Prompts you for the task text and any repo context, then produces a JSON spec.</p>
+  </div>
+  <div class="mode grader">
+    <div class="m-title">/review-spec</div>
+    <div class="m-role">→ Ask</div>
+    <p class="m-desc">Human gate helper. Walks you through a 7-item spec review checklist and gives an APPROVE / REJECT / APPROVE-WITH-EDITS recommendation.</p>
+  </div>
+  <div class="mode coder">
+    <div class="m-title">/coder-input</div>
+    <div class="m-role">→ Coder</div>
+    <p class="m-desc">Hands off an approved spec to the Coder mode with the right framing. Coder then iterates in Agent mode.</p>
+  </div>
+  <div class="mode">
+    <div class="m-title">/pr-body</div>
+    <div class="m-role">→ Ask</div>
+    <p class="m-desc">Assembles a well-formatted PR body from your trace log. Enforces the same section layout every time so PRs are scannable.</p>
+  </div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<section id="first-task">
+<h2><span class="num">07</span>Run your first task, click by click</h2>
+
+<p>The suggested first task: something tiny and reversible so you can shake out any UI issues without stakes. Example: <em>"Add a one-line docstring to the top of the enrichment worker's main function."</em></p>
+
+<div class="step">
+  <div class="step-num">Step 7.1 · Prep</div>
+  <div class="step-title">Create a fresh branch and trace log</div>
+  <pre><code>git checkout -b devgraph/hello-world
+mkdir -p .dev-graph/tasks
+echo "# Task: add docstring to enrichment worker main" &gt; .dev-graph/tasks/hello-world.md
+</code></pre>
+  <p>The <code>.dev-graph/</code> folder is git-ignored (see the kit's <code>.gitignore</code>). This is your trace log — every step below appends to it.</p>
+</div>
+
+<div class="step">
+  <div class="step-num">Step 7.2 · Repo exploration (Ask mode)</div>
+  <div class="step-title">Find the file</div>
+  <p>In the chat panel, switch to <strong>Ask</strong> mode. Type:</p>
+  <pre><code>@workspace where is the enrichment worker's main function? Just show the file path.</code></pre>
+  <p>Copilot returns something like <code>workers/enrichment_worker.py</code>. Add that to your trace log under <code>## Repo context</code>.</p>
+</div>
+
+<div class="step">
+  <div class="step-num">Step 7.3 · Produce the spec</div>
+  <div class="step-title">Spec Architect + /new-task</div>
+  <p>Switch to <strong>Spec Architect</strong> mode. In the chat input, type <code>/new-task</code>. When prompted:</p>
+  <ul>
+    <li><strong>task:</strong> "Add a one-line docstring to the top of the enrichment worker's main function."</li>
+    <li><strong>context:</strong> paste the file path from Step 7.2</li>
+    <li><strong>feedback:</strong> (leave empty)</li>
+  </ul>
+  <p>Copilot returns a JSON spec. Copy the whole block into your trace log under <code>## Spec (proposed)</code>.</p>
+</div>
+
+<div class="step">
+  <div class="step-num">Step 7.4 · Human gate</div>
+  <div class="step-title">/review-spec</div>
+  <p>In the same chat panel, type <code>/review-spec</code> and paste the JSON spec when prompted. Copilot runs the checklist. For a trivial task the recommendation should be APPROVE — for anything real it may be APPROVE-WITH-EDITS.</p>
+  <p>Copy the final approved spec into <code>## Spec (approved)</code> in your trace log.</p>
+</div>
+
+<div class="step">
+  <div class="step-num">Step 7.5 · Code it</div>
+  <div class="step-title">Coder + /coder-input</div>
+  <p>Switch to <strong>Coder</strong> mode. Type <code>/coder-input</code> and paste the approved spec. Copilot goes into Agent mode: proposes an edit to <code>workers/enrichment_worker.py</code>. Accept the hunk.</p>
+</div>
+
+<div class="step">
+  <div class="step-num">Step 7.6 · Verify locally</div>
+  <div class="step-title">Run tests + lint</div>
+  <pre><code>pytest -x -q
+ruff check workers/</code></pre>
+  <p>Paste the results into your trace log under <code>## Verification</code>.</p>
+</div>
+
+<div class="step">
+  <div class="step-num">Step 7.7 · Grade it</div>
+  <div class="step-title">Grader (in a new chat)</div>
+  <p><strong>Open a new chat panel</strong> (don't reuse the Coder's chat — it will bias the Grader). Switch to <strong>Grader</strong> mode. Paste:</p>
+  <ul>
+    <li>The approved spec (JSON)</li>
+    <li>Your diff — run <code>git diff HEAD</code> and paste, or use <code>#file:workers/enrichment_worker.py</code></li>
+    <li>Your test output</li>
+  </ul>
+  <p>Copilot returns a JSON verdict. If pass, copy into <code>## Grader (verdict)</code>. If fail, go back to Coder mode with the feedback.</p>
+</div>
+
+<div class="step">
+  <div class="step-num">Step 7.8 · Write the PR</div>
+  <div class="step-title">/pr-body</div>
+  <p>Type <code>/pr-body</code> (any mode is fine — Ask is enough) and paste the full trace log. Copilot generates a clean PR body.</p>
+</div>
+
+<div class="step">
+  <div class="step-num">Step 7.9 · Ship it</div>
+  <div class="step-title">Commit, push, open PR</div>
+  <pre><code>git add -A
+git commit -m "devgraph: add docstring to enrichment worker main"
+git push -u origin devgraph/hello-world
+gh pr create --title "..." --body "$(cat /tmp/pr-body.md)"</code></pre>
+  <p>Or use the VS Code Source Control panel and the GitHub Pull Requests extension — paste the generated body into the PR description field.</p>
+</div>
+
+<div class="callout graph">
+  <strong>You just ran the full graph by hand.</strong> That's the point of the Copilot edition — the same structure as the automated kit, executed manually. The bigger the task, the more the discipline pays off.
+</div>
+</section>
+
+<!-- ============================================================ -->
+<section id="adaptive">
+<h2><span class="num">08</span>Adaptive behavior: reading the codebase &amp; adjusting</h2>
+
+<p>Every mode is instructed to <strong>read before writing</strong> and to <strong>pause when reality contradicts the plan</strong>. This is what turns the kit from a rigid checklist into a system that respects your codebase.</p>
+
+<h3>What each mode adapts</h3>
+
+<table>
+  <thead><tr><th>Mode</th><th>What it reads</th><th>How it adapts</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>Spec Architect</strong></td>
+      <td>Existing similar features, current field shapes, test fixtures, migration patterns</td>
+      <td>Mirrors prior art in AC wording. Narrows the spec if part of the change is already done. Adds missing-infrastructure ACs when eval sets or fixtures are absent.</td>
+    </tr>
+    <tr>
+      <td><strong>Coder</strong></td>
+      <td>Every file in <code>affected_components</code> plus one neighbor of each. Naming, typing, error handling, imports, logging, config conventions.</td>
+      <td>Matches the local convention exactly — not general best practices. Extends a nearby existing file instead of creating a parallel one. Uses the same fixture style as the tests around it.</td>
+    </tr>
+    <tr>
+      <td><strong>Grader</strong></td>
+      <td>The diff plus the original files it touches</td>
+      <td>Judges the diff against the actual repo conventions, not idealized ones. Fails scope creep — files changed that weren't in <code>affected_components</code>.</td>
+    </tr>
+    <tr>
+      <td><strong>LLM Prompt Engineer</strong></td>
+      <td>Prompt files, existing eval sets, downstream parsers</td>
+      <td>Preserves output schemas that downstream code depends on. Refuses prompt shape changes without a proposed migration for parsers.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>The PAUSE contract</h3>
+
+<p>When a mode discovers something that changes the plan, it will <strong>stop and surface a</strong> <code>PAUSE:</code> <strong>block</strong> instead of forging ahead. You'll see it look like this in the chat:</p>
+
+<div class="ui-mock">
+<pre>
+PAUSE: partial-implementation-detected
+
+While reading `workers/enrichment_worker.py`, I found that
+`preferred_topics` is already extracted (line 87) and written to
+OpenSearch (line 142). AC1, AC3 appear satisfied by existing code.
+
+Only AC2 (prompt wording for last-30-days scope) and AC5 (eval delta)
+appear to need work.
+
+Question: should I narrow the plan to just AC2 + AC5, or is the
+existing implementation known-broken and I should replace it?
+</pre>
+</div>
+
+<p>Six situations trigger a PAUSE:</p>
+
+<ul>
+  <li><strong>Partial implementation detected</strong> — some ACs are already satisfied by existing code.</li>
+  <li><strong>Scope expansion needed</strong> — the change requires touching a component not in <code>affected_components</code>.</li>
+  <li><strong>Missing infrastructure</strong> — no eval set, no migration harness, no fixture for the shape you need.</li>
+  <li><strong>Convention conflict</strong> — the local codebase pattern contradicts the spec's implied shape.</li>
+  <li><strong>Path/structure mismatch</strong> — the spec expects a module structure that doesn't exist.</li>
+  <li><strong>Breaking change unearthed</strong> — a schema or field deletion that will affect other components.</li>
+</ul>
+
+<div class="callout graph">
+  <strong>Your job on PAUSE.</strong> Read the finding. Answer the specific question. Then either say "adapt and continue" (with your instruction on how) or "revise the spec first — going back to Spec Architect". Log the pause + your answer in the trace log — that's the audit for why the plan changed.
+</div>
+
+<h3>Feedback loop: what the Coder tells you when it stops</h3>
+
+<p>When the Coder finishes normally, its stop message is instructed to include three sections beyond the AC-by-AC summary:</p>
+
+<ul>
+  <li><strong>Conventions matched</strong> — a one-liner naming the local patterns it followed (e.g. "matched the async-context pattern from <code>workers/existing_worker.py</code>").</li>
+  <li><strong>Deviations from the Spec</strong> — anything it did differently and why (e.g. "used <code>list[Topic]</code> not <code>list[str]</code> — matches existing enriched fields; suggest updating AC1").</li>
+  <li><strong>Discovered gaps</strong> — anything the Grader or the human should verify that couldn't be verified from the diff alone (e.g. "eval run needed against <code>evals/preferred_topics.jsonl</code>").</li>
+</ul>
+
+<p>This feedback is what carries adaptive learnings into the Grader step and the PR body. Do not skip reading these — they often surface things that would otherwise slip through review.</p>
+
+<div class="callout tip">
+  <strong>Why this matters more for your specific system.</strong> The recommendation backend has hidden coupling: the enrichment prompt's output schema is consumed by the enrichment worker's write path, which is consumed by the OpenSearch mapping, which is consumed by the /recommend API's read path. A change in one spot can silently break three others. The PAUSE contract is what catches this — trust it.
+</div>
+</section>
+
+<!-- ============================================================ -->
+<section id="ui">
+<h2><span class="num">09</span>VS Code UI reference</h2>
+
+<h3>Keyboard shortcuts</h3>
+<table>
+  <thead><tr><th>Action</th><th>macOS</th><th>Windows / Linux</th></tr></thead>
+  <tbody>
+    <tr><td>Open Copilot Chat panel</td><td><kbd>Ctrl</kbd>+<kbd>Cmd</kbd>+<kbd>I</kbd></td><td><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>I</kbd></td></tr>
+    <tr><td>New chat</td><td><kbd>Cmd</kbd>+<kbd>N</kbd> in chat</td><td><kbd>Ctrl</kbd>+<kbd>N</kbd> in chat</td></tr>
+    <tr><td>Command palette</td><td><kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd></td><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd></td></tr>
+    <tr><td>Reload window</td><td>palette → <em>Developer: Reload Window</em></td><td>same</td></tr>
+    <tr><td>Attach a file to chat</td><td>type <code>#file:path</code> or click paperclip</td><td>same</td></tr>
+    <tr><td>Reference workspace</td><td>start with <code>@workspace</code></td><td>same</td></tr>
+    <tr><td>Invoke a prompt</td><td>type <code>/name</code></td><td>same</td></tr>
+  </tbody>
+</table>
+
+<h3>Where things live in the chat panel</h3>
+<div class="ui-mock">
+<pre>
+┌─────────────────────────────────────────────────────────────┐
+│ [+ New chat] [History] [⋯]              [Mode: Coder ▾] [🤖 Claude Sonnet 4 ▾]
+│                                              ▲                 ▲
+│                                              │                 │
+│                                              └── mode picker   └── model picker
+│
+│  You: /coder-input
+│  ...
+│  Copilot: Here's my plan: ...
+│
+├─────────────────────────────────────────────────────────────┤
+│ Type / for commands, @ for participants, # for context...  │
+│  [📎]                                                       │
+└─────────────────────────────────────────────────────────────┘
+</pre>
+</div>
+
+<h3>Settings you may need</h3>
+<pre><code><span class="tok-com">// .vscode/settings.json (workspace) or user settings</span>
+{
+  <span class="tok-str">"chat.promptFiles"</span>: <span class="tok-key">true</span>,
+  <span class="tok-str">"chat.modeFilesLocations"</span>: {
+    <span class="tok-str">".github/chatmodes"</span>: <span class="tok-key">true</span>
+  },
+  <span class="tok-str">"chat.promptFilesLocations"</span>: {
+    <span class="tok-str">".github/prompts"</span>: <span class="tok-key">true</span>
+  }
+}</code></pre>
+<p>Add these if Copilot doesn't pick up the modes/prompts on its own after a reload.</p>
+</section>
+
+<!-- ============================================================ -->
+<section id="tips">
+<h2><span class="num">10</span>Tips, gotchas &amp; anti-patterns</h2>
+
+<div class="callout tip">
+  <strong>Fresh chat between Coder and Grader.</strong> Don't reuse the Coder's chat for the Grader. The Grader will be primed by the Coder's reasoning and rubber-stamp it. Open a new chat.
+</div>
+
+<div class="callout tip">
+  <strong>Use different models for Coder and Grader.</strong> Cross-model verification catches more. If the Coder ran on Sonnet, run the Grader on Opus or GPT-5.
+</div>
+
+<div class="callout tip">
+  <strong>The trace log is the audit.</strong> In three weeks when someone asks "why did we add preferred_topics?", the trace log is the only source of truth. Don't skip it — even for small tasks.
+</div>
+
+<div class="callout warn">
+  <strong>Don't skip the spec review.</strong> The habit of pausing at Step 7.4 is what catches bad ideas. Every time you skip it because "the spec looks fine", you're one step closer to a rollback.
+</div>
+
+<div class="callout warn">
+  <strong>Prompt changes need eval numbers.</strong> If the Coder edits any file under <code>prompts/</code>, do NOT ship without running the offline eval suite. The LLM Prompt Engineer mode reminds you — but the discipline is on you.
+</div>
+
+<div class="callout warn">
+  <strong>Copilot can't run headless.</strong> This whole workflow assumes a human at the keyboard. If you want scheduled / event-driven / batch execution, you need the runtime kit (<code>dev-graph-starter</code>) and programmatic API access.
+</div>
+
+<h3>Common anti-patterns</h3>
+<table>
+  <thead><tr><th>Anti-pattern</th><th>What it costs you</th></tr></thead>
+  <tbody>
+    <tr><td>Using Ask mode instead of Spec Architect for spec production</td><td>You get prose, not JSON. No ACs. Grader has nothing to check against.</td></tr>
+    <tr><td>Using Coder mode without an approved spec</td><td>You're back to prompt engineering. All the discipline benefits evaporate.</td></tr>
+    <tr><td>Letting Coder loop past 20 tool calls without checking in</td><td>Cost creeps and edits sprawl. Pause and steer if it's off track.</td></tr>
+    <tr><td>Grader passes on eval-less prompt change</td><td>The Grader mode says to fail this — trust it. Don't override.</td></tr>
+    <tr><td>Skipping the trace log</td><td>You lose the audit trail. Next month's you will hate current-you.</td></tr>
+  </tbody>
+</table>
+</section>
+
+<!-- ============================================================ -->
+<section id="troubleshoot">
+<h2><span class="num">11</span>Troubleshooting</h2>
+
+<h3>The modes don't appear in the mode picker</h3>
+<ol>
+  <li>Confirm files exist: <code>ls .github/chatmodes/*.chatmode.md</code></li>
+  <li>Reload the window: <kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> → <em>Developer: Reload Window</em></li>
+  <li>Check the setting <code>chat.modeFilesLocations</code> — add <code>".github/chatmodes"</code> if missing</li>
+  <li>Verify frontmatter — the file must start with <code>---</code> and include <code>description:</code></li>
+  <li>Check the Copilot extension version — very old versions don't support custom modes</li>
+</ol>
+
+<h3>The prompts don't appear when I type <code>/</code></h3>
+<ol>
+  <li>Enable <code>chat.promptFiles</code> in settings (may default to off)</li>
+  <li>Add <code>".github/prompts"</code> to <code>chat.promptFilesLocations</code></li>
+  <li>Confirm each file has <code>---</code> frontmatter with <code>description:</code></li>
+  <li>Reload the window</li>
+</ol>
+
+<h3>Copilot doesn't seem to know the repo architecture</h3>
+<ol>
+  <li>Confirm <code>.github/copilot-instructions.md</code> exists at the repo root's <code>.github/</code></li>
+  <li>Check the setting <code>github.copilot.chat.codeGeneration.useInstructionFiles</code> is <code>true</code></li>
+  <li>Ask directly: <em>"What are your instructions?"</em> — Copilot should mention the recommendation backend</li>
+</ol>
+
+<h3>The Coder mode won't edit files</h3>
+<ol>
+  <li>Confirm you're in Coder mode (check the mode picker)</li>
+  <li>Confirm the mode's frontmatter includes <code>editFiles</code> in <code>tools:</code></li>
+  <li>Try invoking with <code>/coder-input</code> — the prompt file may set additional flags</li>
+  <li>Some Copilot versions require Agent mode to be explicitly enabled in settings</li>
+</ol>
+
+<h3>My model of choice isn't in the picker</h3>
+<p>Model availability depends on your Copilot subscription tier and your org's admin settings. Contact your Copilot admin — models like Claude Opus and GPT-5 may need to be enabled at the org level.</p>
+
+<h3>Everything works but it feels slow</h3>
+<p>That's not a bug. Manual graph execution is slower than a single prompt. The discipline is the point — you're trading speed for auditability, testable specs, and independent verification. If you find yourself skipping steps, ask whether the task actually warrants the workflow (small tweaks may not).</p>
+</section>
+
+<footer>
+  Copilot edition of dev-graph · <a href="README.md">README</a> · <a href="WORKFLOW.md">Workflow runbook</a> · <a href="examples/preferred-topics.md">Worked example</a>
+</footer>
+
+</div>
+</body>
+</html>
